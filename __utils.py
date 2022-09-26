@@ -123,43 +123,52 @@ def __deep_update_and_copy(source, target, typing = True):
 
 def ___deep_copy(source):
     if type(source) == list: # TODO: is_iter?
-        arr = []; # list()
+        arr = [] # list()
         for item in source:
-            arr.append(___deep_copy(item));
-        return arr;
+            arr.append(___deep_copy(item))
+        return arr
     elif type(source) == dict:
-        obj = {}; # dict()
+        obj = {} # dict()
         for key in source: # for key in source.keys(): # 
-            obj.update({key: ___deep_copy(source[key])});
-        return obj;
+            obj.update({key: ___deep_copy(source[key])})
+        return obj
     elif type(source) == tuple:
         # TypeError: 'tuple' object does not support item assignment
         # TypeError: 'tuple' object doesn't support item deletion
-        tup = tuple();
+        tup = tuple()
         for item in source:
-            tup += tuple([___deep_copy(item)]); # __add__
-        return tup;
+            tup += tuple([___deep_copy(item)]) # __add__
+        return tup
     else:
-        return source;
+        return source
 
 def __deep_copy(source):
     iter(source); # will raise an exception as it's built-in
-    return ___deep_copy(source);
+    return ___deep_copy(source)
 
 class Map:
     def __init__(self, obj: dict = {}):
         __deep_copy = globals()['__deep_copy']
 
-        self.__dict__.update(obj);
+        self.__dict__.update(obj)
 
     def __getattr__(self, key):
         try:
             return self.__dict__[key];
         except KeyError:
-            return None;
+            return None
 
     def __setattr__(self, key, value):
-        self.__dict__[key] = value;
+        self.__dict__[key] = value
+
+    def __getitem__(self, item):
+        try:
+            return self.__dict__[item]
+        except KeyError:
+            return None
+
+    def __repr__(self):
+        return str(self.__dict__) # TODO: customize
 
 def __globals():
     return Map(globals())
@@ -216,10 +225,14 @@ def __test__():
 
     m = Map({'vFlag': True});
     assert m.vFlag == True;
+    assert m['vFlag'] == True
+    print('m: ', m)
 
-    m.vFlag = False;
-    assert m.vFlag == False;
-    assert m.dFlag == None;
+    m.vFlag = False
+    assert m.vFlag == False
+    assert m['vFlag'] == False
+    assert m.dFlag == None
+    assert m['dFlag'] == None
 
     assert __globals().__deep_copy == __deep_copy
 
