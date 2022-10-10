@@ -35,7 +35,7 @@ def logObject(obj):
 def isEmpty(arr):
     return not bool(len(arr))
 
-def _export_json(obj, t = 1):
+def _export_json(obj, source, t = 1):
     if type(obj) == dict:
         keys = obj.keys()
         log('{')
@@ -46,7 +46,10 @@ def _export_json(obj, t = 1):
             logObject(key)
             log(': ')
 
-            _export_json(obj[key], t+1)
+            if type(obj[key]) == dict and obj[key] == source:
+                log('{...}')
+            else:
+                _export_json(obj[key], source, t+1)
             if len(keys) - i - 1:
                 log(',')
             log('\n')
@@ -61,7 +64,10 @@ def _export_json(obj, t = 1):
             log('\n')
         for i, item in enumerate(obj):
             log('    ' * t)
-            _export_json(item, t+1)
+            if type(item) == dict and item == source:
+                log('{...}')
+            else:
+                _export_json(item, source, t+1)
             if len(obj) - i - 1:
                 log(',')
             log('\n')
@@ -73,7 +79,7 @@ def _export_json(obj, t = 1):
         logObject(obj)
 
 def export_json(obj):
-    _export_json(obj)
+    _export_json(obj, obj)
     log('\n')
 
 
@@ -239,6 +245,12 @@ def __test__():
     export_json({'a': 1, 'func': lambda x: x+1, 'uu':[1,40,[],[1,2]],
         'b': {'c': 10, 'd': 11 , 'f': {}, 'string': 'laaa'}
     })
+
+    # issue - 7
+    obj = {'a': 1,}
+    obj['b'] = obj # also - test with nested arrays [obj] and [[obj]]
+    export_json(obj)
+    # print(obj)
 
 
 if __name__ == '__main__': # false when import-ed
