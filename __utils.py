@@ -1,5 +1,6 @@
-import sys;
-from time import time;
+import re
+import sys
+from time import time
 
 '''
     d = {"_list": []}
@@ -11,16 +12,19 @@ from time import time;
 '''
 
 def estimate(f, log = False, *args):
-    start = time();
+    start = time()
 
     if log:
-        sys.stdout.write('Testing [' + str(f) + ']...');
-        sys.stdout.write('\n');
+        sys.stdout.write('Testing [' + str(f) + ']...')
+        sys.stdout.write('\n')
 
-    f(*args);
+    f(*args)
 
-    sys.stdout.write(str(time() - start));
-    sys.stdout.write('\n');
+    # sys.stdout.write('Cpu_time_used: [')
+    sys.stdout.write(str(time() - start))
+    # sys.stdout.write(']')
+    sys.stdout.write('\n')
+    return time() - start # float - return the time difference for comparison
 
 def log(chunk):
     sys.stdout.write(str(chunk));
@@ -179,6 +183,32 @@ class Map:
 def __globals():
     return Map(globals())
 
+def __split(s, splitter):
+    # s += splitter; # the last element
+    b = True;
+    i = 0;
+    arr = [];
+    _s = '';
+    __s = '';
+    while i < len(s):
+        for x in range(len(splitter)):
+            if i+x < len(s):
+                if s[i+x] != splitter[x]:
+                    b = False
+                    break;
+        if b:
+            arr.append(__s);
+            i += len(splitter)-1;
+            __s = '';
+        else:
+            __s += s[i];
+
+        _s = '';
+        i += 1;
+        b = True
+    arr.append(__s); # the last element final fix
+    return arr;
+
 
 def __test__():
     foo = 'foo';
@@ -252,6 +282,17 @@ def __test__():
     export_json(obj)
     # print(obj)
 
+
+    # built-in python(standard) functions vs python native
+    test_string = '     1' * 100000
+
+    # don't print it out as it takes more time to __repr__
+    estimate(lambda:test_string.split('  '), True) 
+    estimate(lambda:re.split('\ ', test_string), True)
+    estimate(lambda:re.split('\W', test_string), True)
+    # native
+    estimate(lambda:__split(test_string, '  '), True)
+    # pointers are faster
 
 if __name__ == '__main__': # false when import-ed
     __test__();
