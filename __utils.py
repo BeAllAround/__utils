@@ -256,11 +256,11 @@ def __test__():
         __deep_copy(obj1);
         assert False;
     except TypeError:
-        assert True;
+        assert True
 
 
     m = Map({'vFlag': True});
-    assert m.vFlag == True;
+    assert m.vFlag == True
     assert m['vFlag'] == True
     print('m: ', m)
 
@@ -282,10 +282,11 @@ def __test__():
     export_json(obj)
     # print(obj)
 
+    split_tests()
 
+def split_tests():
     # built-in python(standard) functions vs python native
     test_string = '     1' * 100000
-
     # don't print it out as it takes more time to __repr__
     estimate(lambda:test_string.split('  '), True) 
     estimate(lambda:re.split('\ ', test_string), True)
@@ -295,4 +296,4 @@ def __test__():
     # pointers are faster
 
 if __name__ == '__main__': # false when import-ed
-    __test__();
+    __test__()
