@@ -39,7 +39,7 @@ def logObject(obj):
 def isEmpty(arr):
     return not bool(len(arr))
 
-def _export_json(obj, source, t = 1):
+def _export_json(obj, source_id, t = 1):
     if type(obj) == dict:
         keys = obj.keys()
         log('{')
@@ -50,10 +50,10 @@ def _export_json(obj, source, t = 1):
             logObject(key)
             log(': ')
 
-            if type(obj[key]) == dict and obj[key] == source:
+            if id(obj[key]) == source_id: # check the address to avoid Recursion Error
                 log('{...}')
             else:
-                _export_json(obj[key], source, t+1)
+                _export_json(obj[key], source_id, t+1)
             if len(keys) - i - 1:
                 log(',')
             log('\n')
@@ -68,10 +68,10 @@ def _export_json(obj, source, t = 1):
             log('\n')
         for i, item in enumerate(obj):
             log('    ' * t)
-            if type(item) == dict and item == source:
+            if id(item) == source_id:
                 log('{...}')
             else:
-                _export_json(item, source, t+1)
+                _export_json(item, source_id, t+1)
             if len(obj) - i - 1:
                 log(',')
             log('\n')
@@ -83,7 +83,7 @@ def _export_json(obj, source, t = 1):
         logObject(obj)
 
 def export_json(obj):
-    _export_json(obj, obj)
+    _export_json(obj, id(obj))
     log('\n')
 
 
