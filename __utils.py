@@ -146,7 +146,10 @@ def ___deep_copy(source):
     if type(source) == list: # TODO: is_iter?
         arr = [] # list()
         for item in source:
-            arr.append(___deep_copy(item))
+            if id(item) == id(source):
+                arr.append(arr)
+            else:
+                arr.append(___deep_copy(item))
         return arr
     elif type(source) == dict:
         obj = {} # dict()
