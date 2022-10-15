@@ -39,7 +39,7 @@ def logObject(obj):
 def isEmpty(arr):
     return not bool(len(arr))
 
-def _export_json(obj, source, t = 1):
+def _export_json(obj, current_source, main_source, t = 1):
     if type(obj) == dict:
         keys = obj.keys()
         log('{')
@@ -50,13 +50,13 @@ def _export_json(obj, source, t = 1):
             logObject(key)
             log(': ')
 
-            if id(obj[key]) == id(source): # check the address to avoid Recursion Error: pointers
+            if id(obj[key]) == id(current_source): # check the address to avoid Recursion Error: pointers
                 if type(obj[key]) == dict: # circular 'dict'
                     log('{...}')
                 elif type(item) == list: # circular 'list'
                     log('[...]')
             else:
-                _export_json(obj[key], obj[key], t+1)
+                _export_json(obj[key], obj[key], main_source, t+1)
             if len(keys) - i - 1:
                 log(',')
             log('\n')
@@ -71,14 +71,15 @@ def _export_json(obj, source, t = 1):
             log('\n')
         for i, item in enumerate(obj):
             log('    ' * t)
-            if id(item) == id(source):
+            if id(item) == id(current_source):
                 if type(item) == dict: # circular 'dict'
                     log('{...}')
                 elif type(item) == list: # circular 'list'
                     log('[...]')
-
+            elif id(item) == id(main_source):
+                log('{...}') # circular 'dict' by default
             else:
-                _export_json(item, item, t+1)
+                _export_json(item, item, main_source, t+1)
             if len(obj) - i - 1:
                 log(',')
             log('\n')
@@ -90,7 +91,7 @@ def _export_json(obj, source, t = 1):
         logObject(obj)
 
 def export_json(obj):
-    _export_json(obj, obj)
+    _export_json(obj, obj, obj)
     log('\n')
 
 
@@ -283,12 +284,14 @@ def __test__():
         'b': {'c': 10, 'd': 11 , 'f': {}, 'string': 'laaa'}
     })
 
-    # issue - 7
+    # issue - 7: circular objects
     arr = [1,]
     arr.append(arr)
     obj = {'a': 1,}
     obj['b'] = obj # also - test with nested arrays [obj] and [[obj]]
     obj['c'] = arr
+    arr.append(obj)
+    arr.append(arr)
     export_json(obj) # compare with regular 'print'
     print(obj)
 
