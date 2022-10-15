@@ -56,7 +56,10 @@ def _export_json(obj, current_source, main_source, t = 1):
                 elif type(item) == list: # circular 'list'
                     log('[...]')
             else:
-                _export_json(obj[key], obj[key], main_source, t+1)
+                if type(obj[key]) == dict: # new main_source entry
+                    _export_json(obj[key], obj[key], obj[key], t+1)
+                else:
+                    _export_json(obj[key], obj[key], main_source, t+1)
             if len(keys) - i - 1:
                 log(',')
             log('\n')
@@ -148,7 +151,10 @@ def ___deep_copy(source):
     elif type(source) == dict:
         obj = {} # dict()
         for key in source: # for key in source.keys(): # 
-            obj.update({key: ___deep_copy(source[key])})
+            if id(source[key]) == id(source): # source itself
+                obj.update({key: obj}) # obj itself
+            else:
+                obj.update({key: ___deep_copy(source[key])})
         return obj
     elif type(source) == tuple:
         # TypeError: 'tuple' object does not support item assignment
@@ -284,6 +290,12 @@ def __test__():
         'b': {'c': 10, 'd': 11 , 'f': {}, 'string': 'laaa'}
     })
 
+    circular_tests()
+
+    split_tests()
+
+def circular_tests():
+    from copy import deepcopy
     # issue - 7: circular objects
     arr = [1,]
     arr.append(arr)
@@ -292,10 +304,18 @@ def __test__():
     obj['c'] = arr
     arr.append(obj)
     arr.append(arr)
+    obj['d'] = deepcopy(obj)
     export_json(obj) # compare with regular 'print'
     print(obj)
 
-    split_tests()
+    # deep_copy circular objects fix
+    obj1 = {'aa': 1,}
+    obj1['bb'] = obj1
+    obj2 = __deep_copy(obj1);
+    obj3 = deepcopy(obj1)
+    export_json(obj2)
+    export_json(obj3)
+    print(obj2, obj3)
 
 def split_tests():
     # built-in python(standard) functions vs python native
