@@ -146,36 +146,50 @@ def __deep_update_and_copy(source, target, typing = True):
             obj[key] = value;
     return obj;
 
-def ___deep_copy(source):
+def ___deep_copy(source, main_source, _arr): # buggy - TODO: reseach and rewrite
     if type(source) == list: # TODO: is_iter?
         arr = [] # list()
         for item in source:
             if id(item) == id(source):
                 arr.append(arr)
+            elif id(item) == id(main_source):
+                arr.append(main_source)
             else:
-                arr.append(___deep_copy(item))
+                if type(item) == dict:
+                    arr.append(___deep_copy(item, item, _arr))
+                else:
+                    arr.append(___deep_copy(item, main_source, _arr))
         return arr
+
     elif type(source) == dict:
+        from copy import deepcopy
         obj = {} # dict()
         for key in source: # for key in source.keys(): # 
             if id(source[key]) == id(source): # source itself
                 obj.update({key: obj}) # obj itself
             else:
-                obj.update({key: ___deep_copy(source[key])})
+                obj[id(key)] = ___deep_copy(source[key], obj, _arr)
+                # if type(source[key]) == dict:
+                    # d = ___deep_copy(source[key], source)
+                    # obj.update({key: ___deep_copy(source[key], obj)})
+                # else:
+                    # obj.update({key: ___deep_copy(source[key], main_source)})
         return obj
+
     elif type(source) == tuple:
         # TypeError: 'tuple' object does not support item assignment
         # TypeError: 'tuple' object doesn't support item deletion
         tup = tuple()
         for item in source:
-            tup += tuple([___deep_copy(item)]) # __add__
+            tup += tuple([___deep_copy(item, main_source, _arr)]) # __add__
         return tup
+
     else:
         return source
 
 def __deep_copy(source):
     iter(source); # will raise an exception as it's built-in
-    return ___deep_copy(source)
+    return ___deep_copy(source, source, [])
 
 class Map:
     def __init__(self, obj: dict = {}):
@@ -312,8 +326,12 @@ def circular_tests():
     arr.append(obj)
     arr.append(arr)
     obj['d'] = deepcopy(obj)
+    # obj['d'] = __deep_copy(obj) # buggy
+    print('--obj-- ')
     export_json(obj) # compare with regular 'print'
     print(obj)
+    print('--obj-- ')
+
 
     # deep_copy circular objects fix
     obj1 = {'aa': 1,}
