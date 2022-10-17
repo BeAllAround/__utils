@@ -173,7 +173,8 @@ def ___deep_copy(source, main_source, _this):
                     obj_this.update({key: ___deep_copy(source[key], source[key], obj_this)})
                     obj.update({key: obj_this,})
                 else:
-                    obj.update({key: ___deep_copy(source[key], main_source, obj)})
+                    obj_this = obj
+                    obj.update({key: ___deep_copy(source[key], main_source, obj_this)})
         return obj
 
     elif type(source) == tuple:
@@ -343,16 +344,17 @@ def circular_tests():
     print(obj2, obj3)
 
     '''
+    '''
     print('::list - dict::')
     obj4 = {'a': 1,} 
     obj4['b'] = [obj] # list - dict main_source
-    export_json(obj4)
-    print(obj4)
-    # obj5 = __deep_copy(obj4)
-    # export_json(obj5)
-    # print(obj5)
+    # export_json(obj4)
+    # print(obj4)
+    obj5 = __deep_copy(obj4)
+    # obj5 = deep_copy(obj4)
+    export_json(obj5)
+    print(obj5)
     print('::list - dict::')
-    '''
 
 def split_tests():
     # built-in python(standard) functions vs python native
