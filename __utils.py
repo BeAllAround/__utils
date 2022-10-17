@@ -157,7 +157,9 @@ def ___deep_copy(source, main_source, _this):
                 arr.append(_this)
             else:
                 if type(item) == dict:
-                    arr.append(___deep_copy(item, item, _this))
+                    obj_this = {}
+                    obj_this.update(___deep_copy(item, item, obj_this))
+                    arr.append(obj_this)
                 else:
                     arr.append(___deep_copy(item, main_source, _this))
         return arr
@@ -191,7 +193,7 @@ def ___deep_copy(source, main_source, _this):
 def __deep_copy(source):
     iter(source); # will raise an exception as it's built-in
     return ___deep_copy(source, source, source)
-
+"bool ? ... : ..."
 class Map:
     def __init__(self, obj: dict = {}):
         __deep_copy = globals()['__deep_copy']
@@ -326,7 +328,7 @@ def circular_tests():
     obj['c'] = arr
     arr.append(obj)
     arr.append(arr)
-    obj['d'] = deepcopy(obj)
+    # obj['d'] = deepcopy(obj)
     obj['d'] = __deep_copy(obj)
     print('--obj-- ')
     export_json(obj) # compare with regular 'print'
@@ -343,18 +345,19 @@ def circular_tests():
     export_json(obj3)
     print(obj2, obj3)
 
-    '''
+
     '''
     print('::list - dict::')
     obj4 = {'a': 1,} 
     obj4['b'] = [obj] # list - dict main_source
     # export_json(obj4)
     # print(obj4)
-    obj5 = __deep_copy(obj4)
-    # obj5 = deep_copy(obj4)
+    obj5 = __deep_copy(obj4) # doesn't pass at all - find out why
+    obj5 = deepcopy(obj4)
     export_json(obj5)
     print(obj5)
     print('::list - dict::')
+    '''
 
 def split_tests():
     # built-in python(standard) functions vs python native
