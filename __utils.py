@@ -193,7 +193,7 @@ def ___deep_copy(source, main_source, _this):
 def __deep_copy(source):
     iter(source); # will raise an exception as it's built-in
     return ___deep_copy(source, source, source)
-"bool ? ... : ..."
+
 class Map:
     def __init__(self, obj: dict = {}):
         __deep_copy = globals()['__deep_copy']
