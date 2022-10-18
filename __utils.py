@@ -62,8 +62,6 @@ def _export_json(obj, memo, t = 1):
                 elif type(obj[key]) == list: # circular 'list'
                     log('[...]')
             else:
-                if (not _id) and (type(obj[key]) == dict):
-                    memo[id(obj[key])] = obj[key]
                 _export_json(obj[key], memo, t+1)
             if len(keys) - i - 1:
                 log(',')
@@ -91,8 +89,6 @@ def _export_json(obj, memo, t = 1):
                 elif type(item) == list: # circular 'list'
                     log('[...]')
             else:
-                if (not _id) and (type(item) == dict):
-                    memo[id(item)] = item
                 _export_json(item, memo, t+1)
 
             if len(obj) - i - 1:
@@ -389,8 +385,8 @@ def circular_tests():
     obj4['b'] = [obj] # list - dict main_source
     # export_json(obj4)
     # print(obj4)
-    obj5 = __deep_copy(obj4) # doesn't pass at all - find out why
-    # obj5 = deepcopy(obj4)
+    # obj5 = __deep_copy(obj4) # doesn't pass at all - find out why
+    obj5 = deepcopy(obj4)
     export_json(obj5)
     print(obj5)
     print('::list - dict::')
