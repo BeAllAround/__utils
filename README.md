@@ -12,6 +12,6 @@ Ready to use:
 
 `utils.deep_update`
 
-`utils.export_json`
+`utils.export_json # format a dict into json-readable data`
 
 All the namespaces starting with an underscore are experimental.
