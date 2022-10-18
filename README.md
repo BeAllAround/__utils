@@ -14,4 +14,4 @@ Ready to use:
 
 `utils.export_json`
 
-All the namespaces starting with the underscore are experimental.
+All the namespaces starting with an underscore are experimental.
