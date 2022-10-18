@@ -4,4 +4,4 @@ Py_utils is a very small set of Python-native implementations for Python standar
 
 In future, it will aim for improved unit tests and vice versa.
 
-Any suggestions or algorithmicalgorithmic improvements will be much appreciated.
+Any suggestions or algorithmicalgorithmicalgorithmic improvements will be much appreciated.
