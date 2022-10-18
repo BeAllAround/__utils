@@ -109,7 +109,9 @@ def __deep_update(obj, _obj, typing = True):
                 raise TypeError(); # TYPE RESTRICTION
             if type(value) != dict and type(obj[key]) != dict: # overwrite values but NOT OBJECTS(DICTS)!
                 obj[key] = value;
-            if id(value) == id(_obj) and id(obj[key]) == id(obj): # references to the same object
+            if (id(value) == id(_obj) and id(obj[key]) == id(obj)): # references to the same object
+                continue
+            if id(value) == id(obj) and id(obj[key]) == id(_obj):
                 continue
             if type(obj[key]) == dict and type(value) == dict:
                 __deep_update(obj[key], value);
@@ -328,11 +330,15 @@ def __test__():
     # update recognasing circular objects (references to the same object)
     b1 = {'a': 1,}
     b2 = {'a': 2,}
-    b1['b'] = b1
-    b2['b'] = b2
+    b1['b'] = b2
+    b2['b'] = b1
+     
+    # b1['b'] = b1
+    # b2['b'] = b2
 
     __deep_update(b1, b2)
-    export_json(b1)
+    # export_json(b1) # bugs
+    print(b1)
 
 def circular_tests():
     from copy import deepcopy
