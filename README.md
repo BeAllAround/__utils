@@ -5,3 +5,13 @@ Py_utils is a very small set of Python-native implementations for Python standar
 In future, it will aim for improved unit tests and vice versa.
 
 Any suggestions or algorithmic improvements will be much appreciated.
+
+Ready to use:
+
+`utils.Map`
+
+`utils.deep_update`
+
+`utils.export_json`
+
+All the namespaces starting with the underscore are experimental.
