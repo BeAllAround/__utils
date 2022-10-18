@@ -109,6 +109,8 @@ def __deep_update(obj, _obj, typing = True):
                 raise TypeError(); # TYPE RESTRICTION
             if type(value) != dict and type(obj[key]) != dict: # overwrite values but NOT OBJECTS(DICTS)!
                 obj[key] = value;
+            if id(value) == id(_obj) and id(obj[key]) == id(obj): # references to the same object
+                continue
             if type(obj[key]) == dict and type(value) == dict:
                 __deep_update(obj[key], value);
         else:
@@ -154,12 +156,16 @@ def ___deep_copy(source, main_source, _this):
             if id(item) == id(source):
                 arr.append(arr)
             elif id(item) == id(main_source):
+                print("LLLLIIIISTTT")
+                print('_this: ', id(_this))
                 arr.append(_this)
             else:
                 if type(item) == dict:
                     obj_this = {}
-                    obj_this.update(___deep_copy(item, item, obj_this))
-                    arr.append(obj_this)
+                    # print('item: ', item)
+                    # return obj_this
+                    arr.append(___deep_copy(item, item, obj_this))
+                    # arr.append(obj_this)
                 else:
                     arr.append(___deep_copy(item, main_source, _this))
         return arr
@@ -167,10 +173,11 @@ def ___deep_copy(source, main_source, _this):
     elif type(source) == dict:
         obj = {} # dict()
         for key in source: # for key in source.keys(): # 
-            if id(source[key]) == id(source): # source itself
+            if id(source[key]) == id(main_source): # source itself
                 obj.update({key: obj}) # obj itself
             else:
                 if type(source[key]) == dict:
+                    print('___key: ', key, source[key])
                     obj_this = {} # obj_this - solution on the horizon
                     obj_this.update({key: ___deep_copy(source[key], source[key], obj_this)})
                     obj.update({key: obj_this,})
@@ -317,6 +324,15 @@ def __test__():
     circular_tests()
 
     split_tests()
+    
+    # update recognasing circular objects (references to the same object)
+    b1 = {'a': 1,}
+    b2 = {'a': 2,}
+    b1['b'] = b1
+    b2['b'] = b2
+
+    __deep_update(b1, b2)
+    export_json(b1)
 
 def circular_tests():
     from copy import deepcopy
@@ -346,17 +362,17 @@ def circular_tests():
     print(obj2, obj3)
 
 
-    '''
     print('::list - dict::')
     obj4 = {'a': 1,} 
     obj4['b'] = [obj] # list - dict main_source
     # export_json(obj4)
     # print(obj4)
     obj5 = __deep_copy(obj4) # doesn't pass at all - find out why
-    obj5 = deepcopy(obj4)
+    # obj5 = deepcopy(obj4)
     export_json(obj5)
     print(obj5)
     print('::list - dict::')
+    '''
     '''
 
 def split_tests():
