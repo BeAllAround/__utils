@@ -226,7 +226,7 @@ class Map:
 
         self.__dict__.update(obj)
 
-    # '__getattr__' only called when there is no such attribute
+    # '__getattr__' only gets called when there is no such attribute
     # in comparison to '__getattribute__' where it is always called
     def __getattr__(self, key):
         try:
