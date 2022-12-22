@@ -1,5 +1,7 @@
-import sys;
-from time import time;
+#!/usr/bin/python3
+import re
+import sys
+from time import time
 
 '''
     d = {"_list": []}
@@ -11,16 +13,19 @@ from time import time;
 '''
 
 def estimate(f, log = False, *args):
-    start = time();
+    start = time()
 
     if log:
-        sys.stdout.write('Testing [' + str(f) + ']...');
-        sys.stdout.write('\n');
+        sys.stdout.write('Testing [' + str(f) + ']...')
+        sys.stdout.write('\n')
 
-    f(*args);
+    f(*args)
 
-    sys.stdout.write(str(time() - start));
-    sys.stdout.write('\n');
+    # sys.stdout.write('Cpu_time_used: [')
+    sys.stdout.write(str(time() - start))
+    # sys.stdout.write(']')
+    sys.stdout.write('\n')
+    return time() - start # float - return the time difference for comparison
 
 def log(chunk):
     sys.stdout.write(str(chunk));
@@ -35,8 +40,12 @@ def logObject(obj):
 def isEmpty(arr):
     return not bool(len(arr))
 
-def _export_json(obj, source, t = 1):
+def _export_json(obj, memo, t = 1):
     if type(obj) == dict:
+        _id = memo.get(id(obj))
+        if not _id:
+            memo[id(obj)] = obj
+
         keys = obj.keys()
         log('{')
         if not isEmpty(keys):
@@ -46,10 +55,21 @@ def _export_json(obj, source, t = 1):
             logObject(key)
             log(': ')
 
-            if type(obj[key]) == dict and obj[key] == source:
-                log('{...}')
+            _id = memo.get(id(obj[key]))
+            if _id: # check the address to avoid Recursion Error: pointers
+                if type(obj[key]) == dict: # circular 'dict'
+                    log('{...}')
+                elif type(obj[key]) == list: # circular 'list'
+                    log('[...]')
             else:
-                _export_json(obj[key], source, t+1)
+                # circular check algo
+                memo[id(obj[key])] = obj[key]
+
+                _export_json(obj[key], memo, t+1)
+
+                # circular check algo - remove the 'id' for the current scope
+                del memo[id(obj[key])]
+
             if len(keys) - i - 1:
                 log(',')
             log('\n')
@@ -59,15 +79,31 @@ def _export_json(obj, source, t = 1):
         log('}')
 
     elif type(obj) == list:
+        _id = memo.get(id(obj))
+        if not _id:
+            memo[id(obj)] = obj
+
         log('[')
         if not isEmpty(obj):
             log('\n')
         for i, item in enumerate(obj):
             log('    ' * t)
-            if type(item) == dict and item == source:
-                log('{...}')
+
+            _id = memo.get(id(item))
+            if _id: # check the address to avoid Recursion Error: pointers
+                if type(item) == dict: # circular 'dict'
+                    log('{...}')
+                elif type(item) == list: # circular 'list'
+                    log('[...]')
             else:
-                _export_json(item, source, t+1)
+                # circular check algo
+                memo[id(item)] = item
+
+                _export_json(item, memo, t+1)
+
+                # circular check algo - remove the 'id' for the current scope
+                del memo[id(item)]
+
             if len(obj) - i - 1:
                 log(',')
             log('\n')
@@ -79,7 +115,7 @@ def _export_json(obj, source, t = 1):
         logObject(obj)
 
 def export_json(obj):
-    _export_json(obj, obj)
+    _export_json(obj, {}) # memo map for circular objects / references to the objects themselves
     log('\n')
 
 
@@ -90,6 +126,10 @@ def __deep_update(obj, _obj, typing = True):
                 raise TypeError(); # TYPE RESTRICTION
             if type(value) != dict and type(obj[key]) != dict: # overwrite values but NOT OBJECTS(DICTS)!
                 obj[key] = value;
+            if (id(value) == id(_obj) and id(obj[key]) == id(obj)): # references to the same object
+                continue
+            if id(value) == id(obj) and id(obj[key]) == id(_obj):
+                continue
             if type(obj[key]) == dict and type(value) == dict:
                 __deep_update(obj[key], value);
         else:
@@ -127,30 +167,58 @@ def __deep_update_and_copy(source, target, typing = True):
             obj[key] = value;
     return obj;
 
-def ___deep_copy(source):
+def ___deep_copy(source, main_source, _this):
+
     if type(source) == list: # TODO: is_iter?
         arr = [] # list()
         for item in source:
-            arr.append(___deep_copy(item))
+            if id(item) == id(source):
+                arr.append(arr)
+            elif id(item) == id(main_source):
+                print("LLLLIIIISTTT")
+                print('_this: ', id(_this))
+                arr.append(_this)
+            else:
+                if type(item) == dict:
+                    obj_this = {}
+                    # print('item: ', item)
+                    # return obj_this
+                    arr.append(___deep_copy(item, item, obj_this))
+                    # arr.append(obj_this)
+                else:
+                    arr.append(___deep_copy(item, main_source, _this))
         return arr
+
     elif type(source) == dict:
         obj = {} # dict()
         for key in source: # for key in source.keys(): # 
-            obj.update({key: ___deep_copy(source[key])})
+            if id(source[key]) == id(main_source): # source itself
+                obj.update({key: obj}) # obj itself
+            else:
+                if type(source[key]) == dict:
+                    print('___key: ', key, source[key])
+                    obj_this = {} # obj_this - solution on the horizon
+                    obj_this.update({key: ___deep_copy(source[key], source[key], obj_this)})
+                    obj.update({key: obj_this,})
+                else:
+                    obj_this = obj
+                    obj.update({key: ___deep_copy(source[key], main_source, obj_this)})
         return obj
+
     elif type(source) == tuple:
         # TypeError: 'tuple' object does not support item assignment
         # TypeError: 'tuple' object doesn't support item deletion
         tup = tuple()
         for item in source:
-            tup += tuple([___deep_copy(item)]) # __add__
+            tup += tuple([___deep_copy(item, main_source, _this)]) # __add__
         return tup
+
     else:
         return source
 
 def __deep_copy(source):
     iter(source); # will raise an exception as it's built-in
-    return ___deep_copy(source)
+    return ___deep_copy(source, source, source)
 
 class Map:
     def __init__(self, obj: dict = {}):
@@ -178,6 +246,32 @@ class Map:
 
 def __globals():
     return Map(globals())
+
+def __split(s, splitter):
+    # s += splitter; # the last element
+    b = True;
+    i = 0;
+    arr = [];
+    _s = '';
+    __s = '';
+    while i < len(s):
+        for x in range(len(splitter)):
+            if i+x < len(s):
+                if s[i+x] != splitter[x]:
+                    b = False
+                    break;
+        if b:
+            arr.append(__s);
+            i += len(splitter)-1;
+            __s = '';
+        else:
+            __s += s[i];
+
+        _s = '';
+        i += 1;
+        b = True
+    arr.append(__s); # the last element final fix
+    return arr;
 
 
 def __test__():
@@ -226,11 +320,11 @@ def __test__():
         __deep_copy(obj1);
         assert False;
     except TypeError:
-        assert True;
+        assert True
 
 
     m = Map({'vFlag': True});
-    assert m.vFlag == True;
+    assert m.vFlag == True
     assert m['vFlag'] == True
     print('m: ', m)
 
@@ -246,12 +340,89 @@ def __test__():
         'b': {'c': 10, 'd': 11 , 'f': {}, 'string': 'laaa'}
     })
 
-    # issue - 7
+    obj = {'a': 1,}
+    obj['b'] = obj
+    export_json(obj)
+    print(obj)
+
+    circular_tests()
+
+    split_tests()
+    
+    # update recognasing circular objects (references to the same object)
+    b1 = {'a': 1,}
+    b2 = {'a': 2,}
+    b1['b'] = b2
+    b2['b'] = b1
+     
+    # b1['b'] = b1
+    # b2['b'] = b2
+
+    # __deep_update(b1, b2)
+    export_json(b1)
+    print(b1)
+    '''
+    '''
+
+    obj = {'a': 1,}
+    obj2 = {'b': 2}
+    obj['c'] = obj2
+    obj['d'] = obj2
+    obj['f'] = obj
+    export_json(obj)
+    print(obj)
+
+def circular_tests():
+    from copy import deepcopy
+    # issue - 7: circular objects
+    arr = [1,]
+    arr.append(arr)
     obj = {'a': 1,}
     obj['b'] = obj # also - test with nested arrays [obj] and [[obj]]
-    export_json(obj)
-    # print(obj)
+    obj['c'] = arr
+    arr.append(obj)
+    arr.append(arr)
+    obj['d'] = deepcopy(obj)
+    # obj['d'] = __deep_copy(obj)
+    print('--obj-- ')
+    export_json(obj) # compare with regular 'print'
+    print(obj)
+    print('--obj-- ')
 
+
+    # deep_copy circular objects fix
+    obj1 = {'aa': 1,}
+    obj1['bb'] = obj1
+    obj2 = __deep_copy(obj1);
+    obj3 = deepcopy(obj1)
+    export_json(obj2)
+    export_json(obj3)
+    print(obj2, obj3)
+
+
+    '''
+    print('::list - dict::')
+    obj4 = {'a': 1,} 
+    obj4['b'] = [obj] # list - dict main_source
+    export_json(obj4)
+    print(obj4)
+    # obj5 = __deep_copy(obj4) # doesn't pass at all - find out why
+    obj5 = deepcopy(obj4)
+    export_json(obj5)
+    print(obj5)
+    print('::list - dict::')
+    '''
+
+def split_tests():
+    # built-in python(standard) functions vs python native
+    test_string = '     1' * 100000
+    # don't print it out as it takes more time to __repr__
+    estimate(lambda:test_string.split('  '), True) 
+    estimate(lambda:re.split('\ ', test_string), True)
+    estimate(lambda:re.split('\W', test_string), True)
+    # native
+    estimate(lambda:__split(test_string, '  '), True)
+    # pointers are faster
 
 if __name__ == '__main__': # false when import-ed
-    __test__();
+    __test__()
