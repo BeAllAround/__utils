@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import re
 import sys
 from time import time
@@ -123,6 +124,7 @@ def _export_json(obj, memo, t = 1):
 def export_json(obj):
     _export_json(obj, {}) # memo map for circular objects / references to the objects themselves
     log('\n')
+
 
 
 def __deep_update(obj, _obj, typing = True):
@@ -282,6 +284,9 @@ def __split(s, splitter):
     return arr;
 
 
+def deep_update(source, dest, typing = True) -> None:
+    __deep_update(source, dest)
+
 def __test__():
     foo = 'foo';
     a1 = {foo: {1: '2', 4: 4, 5: 5, 6: {7: {9: 9}}}, 'a': 5};
@@ -437,3 +442,4 @@ def split_tests():
 
 if __name__ == '__main__': # false when import-ed
     __test__()
+
