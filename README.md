@@ -1,4 +1,4 @@
-# py_utils - WORK IN PROGRESS
+# py_utils - WORK IN PROGRESS and FOR EDUCATIONAL PURPOSES
 
 Py_utils is a very small set of Python-native implementations for Python standard library. These implementations should give you some insight into how some Python's built-ins may behave.
 
