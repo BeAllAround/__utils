@@ -10,7 +10,7 @@ Ready to use:
 
 `utils.Map`
 
-`utils.deep_update`
+`utils.deep_update # merge two objects deeply`
 
 `utils.export_json # format a dict into json-readable data`
 
