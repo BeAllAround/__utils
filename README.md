@@ -14,4 +14,6 @@ Ready to use:
 
 `utils.export_json # format a dict into json-readable data`
 
+For ready-to-use functions - the examples and docs can be found in `/examples` folder.
+
 All the namespaces starting with an underscore are experimental.
