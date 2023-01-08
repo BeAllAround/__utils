@@ -33,7 +33,12 @@ def log(chunk):
 def logObject(obj):
     if type(obj) == str:
         log('"')
-    log(obj)
+
+    if obj == None:
+        log('null')
+    else:
+        log(obj)
+
     if type(obj) == str:
         log('"')
 
@@ -63,6 +68,7 @@ def _export_json(obj, memo, t = 1):
                     log('[...]')
             else:
                 # circular check algo
+                # TODO: Circular Reference error should be raised ?
                 memo[id(obj[key])] = obj[key]
 
                 _export_json(obj[key], memo, t+1)
@@ -400,6 +406,9 @@ def circular_tests():
     export_json(obj2)
     export_json(obj3)
     print(obj2, obj3)
+
+    obj = { 'null': None, }
+    export_json(obj)
 
 
     '''
