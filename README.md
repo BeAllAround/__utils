@@ -1,6 +1,6 @@
 # py_utils - WORK IN PROGRESS and FOR EDUCATIONAL PURPOSES
 
-Py_utils is a very small set of Python-native implementations. These implementations should give you some insight into how some Python's built-ins may behave.
+Py_utils is a very small set of Python-native implementations. These implementations should give you some insight into how some Python's built-ins could work.
 
 In future, it will aim for improved unit tests and vice versa.
 
