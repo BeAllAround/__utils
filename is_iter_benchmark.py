@@ -23,7 +23,7 @@ def __is_iter(v):
     except AttributeError: return False
     return True
 
-def benchmark(*args):
+def benchmark(func, *args):
     SIZE = 100
 
     for arg in args:
@@ -31,12 +31,12 @@ def benchmark(*args):
         for i in range(0, SIZE):
             start = time()
             for i in range(0, 10000):
-                is_iter(arg)
+                func(arg)
             avg += time() - start
 
         print(str(type(arg)) + ' avg: ', avg / SIZE )
 
 if __name__ == '__main__':
 
-    benchmark([1] * 100000, 1, 'aaa', (1, 3) )
+    benchmark(is_iter, [1] * 100000, 1, 'aaa', (1, 3) )
 
